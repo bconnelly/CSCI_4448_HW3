@@ -1,21 +1,53 @@
 import java.util.*;
+import java.util.List;
 import java.io.*;
 import java.awt.*;
+
 import javax.swing.*;
 import javax.imageio.*;
 
-interface Terrain
-{
+
+interface Terrain{
+	String getType();
 	void draw(Graphics graphics, int x, int y);
 }
+
+
+//Flyweight factory
+class TreeFlyweightFactory{
+	
+	public static List<Terrain> pool = new ArrayList<Terrain>(); 
+	
+	public TreeFlyweightFactory(){
+		pool = new ArrayList<Terrain>();
+	}
+	
+	public static Terrain getTree(String type){
+		//check if there's already a tree with this type 
+		for(Terrain tree: pool){
+			if(tree.getType().equals(type)){
+				return tree;
+			}
+		}
+		//if not, create one and save it to the pool
+		System.out.println("Creating new " + type + " tree");
+		Terrain tree = new Tree(type);
+		pool.add(tree);
+		return tree;
+	}
+}
+
+
 class Tree implements Terrain
 {
 	private int x;
 	private int y;
 	private Image image;
+	private String Type;
 	public Tree(String type)
 	{
-		System.out.println("Creating a new instance of a tree of type " + type);
+		Type = type;
+		//System.out.println("Creating a new instance of a tree of type " + type);
 		String filename = "tree" + type + ".png";
 		try
 		{
@@ -31,13 +63,17 @@ class Tree implements Terrain
 	{
 		graphics.drawImage(image, x, y, null);
 	}
+	public String getType(){
+		return Type;
+	}
+	
 }
 class TreeFactory
 {
 	private static final ArrayList<Tree> mylist = new ArrayList<Tree>();
 	public static Terrain getTree(String type)
 	{
-		Tree tree = new Tree(type);
+		Tree tree = (Tree)TreeFlyweightFactory.getTree(type);
 		mylist.add(tree);
 		return tree;
    }
@@ -47,6 +83,7 @@ class TreeFactory
  */
 class TreeDemo extends JPanel
 {
+	long start = System.currentTimeMillis();
 	private static final int width = 800;
 	private static final int height = 700;
 	private static final int numTrees = 50;
@@ -59,6 +96,8 @@ class TreeDemo extends JPanel
 			Tree tree = (Tree)TreeFactory.getTree(getRandomType());
 			tree.draw(graphics, getRandomX(width), getRandomY(height));
 		}
+		//this is only here so we can get an estimation of the running time
+		printTime(start);
 	}
 	public static void main(String[] args) 
 	{
@@ -68,6 +107,14 @@ class TreeDemo extends JPanel
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
 	}
+	
+	//helper function to print running time
+	public static void printTime(long start){
+		long end = System.currentTimeMillis();
+		long totalTime = end - start;
+		System.out.println("Running time: " + totalTime);
+	}
+	
 	private static String getRandomType() 
 	{
 		return type[(int)(Math.random()*type.length)];

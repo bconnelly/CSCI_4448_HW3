@@ -1,6 +1,6 @@
 interface Logging
 {
-	public enum LOG_TYPE {TXT, XML, HTML};
+	//public enum LOG_TYPE {TXT, XML, HTML};
 	public void log(String msg);
 }
 
@@ -50,15 +50,8 @@ class Analysis
 			System.exit(-1);
 		}
 		String type = args[0];
-		Logging logfile;
-		if (type.equalsIgnoreCase("text"))
-			logfile = new LogText();
-		else if (type.equalsIgnoreCase("xml"))
-			logfile = new LogXML();
-		else if (type.equalsIgnoreCase("html"))
-			logfile = new LogHTML();
-		else
-			logfile = new LogText();
+		Logging logfile = getType(type);
+		
 		logfile.log("Starting application...");
 
 		System.out.println("... read in data file to analyze ...");
@@ -67,5 +60,22 @@ class Analysis
 		// code...
 		System.out.println("... Printing analysis results ...");
 		// code...
+	}
+	
+	public static Logging getType(String in){
+		Logging ret = null;
+		
+		if(in.equalsIgnoreCase("text"))
+			ret = new LogText();
+		else if (in.equalsIgnoreCase("xml"))
+			ret = new LogXML();
+		else if (in.equalsIgnoreCase("html"))
+			ret = new LogHTML();
+		else{
+			System.out.println("Please enter either \"text\", \"html\" or \"xml\"");
+			System.exit(-1);
+		}
+		
+		return ret;
 	}
 }
